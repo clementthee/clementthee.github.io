@@ -1,8 +1,8 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
-import { ui } from '../utils/ui';
+import MainLayout from '../../layouts/MainLayout.astro';
+import { ui } from '../../utils/ui';
 
-const lang = 'es';
+const lang = 'en';
 const t = ui[lang];
 ---
 
@@ -20,8 +20,8 @@ const t = ui[lang];
             Open to Opportunities
           </div>
           
-          <a href="/en" class="text-xs font-mono text-slate-400 hover:text-white transition-colors bg-slate-800/40 border border-slate-800 px-2.5 py-1 rounded-md">
-            🇺🇸 English
+          <a href="/" class="text-xs font-mono text-slate-400 hover:text-white transition-colors bg-slate-800/40 border border-slate-800 px-2.5 py-1 rounded-md">
+            🇬🇹 Español
           </a>
         </div>
         
@@ -151,7 +151,6 @@ const t = ui[lang];
   const btnLeft = document.getElementById('btn-left');
   const btnRight = document.getElementById('btn-right');
 
-  // Leer string de alerta traducida desde el HTML dataset
   const alertText = modal?.dataset.alert || "Game Over! ";
 
   let snake = [{x: 10, y: 10}];
@@ -268,7 +267,7 @@ const t = ui[lang];
       ctx.textBaseline = 'middle';
       
       bugs.forEach(bug => {
-        ctx.fillText('🐛', (bug.x * gridSize) + (gridSize / 2), (bug.y * gridSize) + (gridSize / 2) + 1);
+        ctx.fillText('🐛', (bug.x * gridSize) + (gridSize / 2), (bug.y * gridSize) + (bug.y * gridSize) + 1);
       });
 
       const currentIcon = foodIconMap[food.type];
