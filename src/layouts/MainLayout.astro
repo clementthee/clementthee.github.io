@@ -1,0 +1,16 @@
+---
+// Importamos el CSS global que creamos con las directivas de Tailwind
+import '../styles/global.css';
+
+const { title } = Astro.props;
+---
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-slate-950 text-slate-200 antialiased">
+    <slot />
+  </body>
+</html>
