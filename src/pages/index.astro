@@ -96,10 +96,22 @@ import MainLayout from '../layouts/MainLayout.astro';
         <button id="close-game-btn" class="absolute top-4 right-4 text-slate-500 hover:text-white font-mono text-sm cursor-pointer">✕ Cerrar</button>
         
         <h3 class="text-white font-bold font-mono text-lg mb-2">Astro Snake Game</h3>
-        <p class="text-xs text-slate-400 font-mono mb-4">¡Cuidado con los Bugs 🐛 letales al subir de nivel!</p>
+        <p class="text-xs text-slate-400 font-mono mb-4 text-center">¡Cuidado con los Bugs 🐛 letales al subir de nivel!</p>
         
         <canvas id="gameCanvas" width="300" height="300" class="bg-slate-950 border border-slate-800 rounded-xl shadow-inner"></canvas>
         
+        <div class="w-full sm:hidden grid grid-cols-3 gap-2 max-w-[180px] mt-6 select-none">
+          <div></div>
+          <button id="btn-up" class="bg-slate-800 border border-slate-700 active:bg-blue-600 active:border-blue-500 text-white font-bold py-3 rounded-xl flex items-center justify-center shadow-lg text-lg">▲</button>
+          <div></div>
+          <button id="btn-left" class="bg-slate-800 border border-slate-700 active:bg-blue-600 active:border-blue-500 text-white font-bold py-3 rounded-xl flex items-center justify-center shadow-lg text-lg">◀</button>
+          <div class="bg-slate-950/40 border border-slate-800/50 rounded-xl"></div>
+          <button id="btn-right" class="bg-slate-800 border border-slate-700 active:bg-blue-600 active:border-blue-500 text-white font-bold py-3 rounded-xl flex items-center justify-center shadow-lg text-lg">▶</button>
+          <div></div>
+          <button id="btn-down" class="bg-slate-800 border border-slate-700 active:bg-blue-600 active:border-blue-500 text-white font-bold py-3 rounded-xl flex items-center justify-center shadow-lg text-lg">▼</button>
+          <div></div>
+        </div>
+
         <div class="mt-4 flex justify-between w-full font-mono text-sm px-2">
           <span class="text-blue-400">Score: <span id="score-val">0</span></span>
           <button id="start-game-btn" class="text-amber-400 hover:text-amber-300 underline cursor-pointer">Reiniciar</button>
@@ -121,6 +133,11 @@ import MainLayout from '../layouts/MainLayout.astro';
   const ctx = canvas.getContext('2d');
   const scoreVal = document.getElementById('score-val');
   const restartBtn = document.getElementById('start-game-btn');
+
+  const btnUp = document.getElementById('btn-up');
+  const btnDown = document.getElementById('btn-down');
+  const btnLeft = document.getElementById('btn-left');
+  const btnRight = document.getElementById('btn-right');
 
   let snake = [{x: 10, y: 10}];
   let food = {x: 5, y: 5, type: 'postgres'};
@@ -164,13 +181,10 @@ import MainLayout from '../layouts/MainLayout.astro';
   function generateFood() {
     food.x = Math.floor(Math.random() * tileCount);
     food.y = Math.floor(Math.random() * tileCount);
-    
-    // Evitar que la comida aparezca encima de un bug existente
     while (bugs.some(b => b.x === food.x && b.y === food.y)) {
       food.x = Math.floor(Math.random() * tileCount);
       food.y = Math.floor(Math.random() * tileCount);
     }
-    
     food.type = foodTypes[Math.floor(Math.random() * foodTypes.length)];
   }
 
@@ -178,7 +192,6 @@ import MainLayout from '../layouts/MainLayout.astro';
     let bugX = Math.floor(Math.random() * tileCount);
     let bugY = Math.floor(Math.random() * tileCount);
 
-    // Asegurar que el bug no aparezca sobre la serpiente o la comida
     const collision = 
       snake.some(s => s.x === bugX && s.y === bugY) || 
       (food.x === bugX && food.y === bugY) ||
@@ -200,7 +213,6 @@ import MainLayout from '../layouts/MainLayout.astro';
 
     const head = {x: nextX, y: nextY};
     
-    // Validar colisión contra sí mismo o contra un Bug letal
     const hitSelf = snake.some(s => s.x === head.x && s.y === head.y);
     const hitBug = bugs.some(b => b.x === head.x && b.y === head.y);
 
@@ -216,7 +228,6 @@ import MainLayout from '../layouts/MainLayout.astro';
       score += 10;
       if(scoreVal) scoreVal.innerText = score.toString();
       
-      // Añadir dificultad progresiva: genera un bug con base al puntaje obtenido
       if (Math.random() < 0.6) { 
         generateBug();
       }
@@ -234,21 +245,17 @@ import MainLayout from '../layouts/MainLayout.astro';
       ctx.fillStyle = '#020617';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Dibujar la serpiente
       ctx.fillStyle = '#6366f1';
       snake.forEach(part => ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1));
 
-      // Configuración de texto para emojis (Comida y Bugs)
       ctx.font = '16px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
-      // Dibujar los Bugs letales acumulados
       bugs.forEach(bug => {
         ctx.fillText('🐛', (bug.x * gridSize) + (gridSize / 2), (bug.y * gridSize) + (gridSize / 2) + 1);
       });
 
-      // Dibujar la Comida del Stack
       const currentIcon = foodIconMap[food.type];
       ctx.fillText(currentIcon, (food.x * gridSize) + (gridSize / 2), (food.y * gridSize) + (gridSize / 2) + 1);
     }
@@ -265,6 +272,11 @@ import MainLayout from '../layouts/MainLayout.astro';
       if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
     }
   });
+
+  btnUp?.addEventListener('click', () => { if (dy === 0) { dx = 0; dy = -1; } });
+  btnDown?.addEventListener('click', () => { if (dy === 0) { dx = 0; dy = 1; } });
+  btnLeft?.addEventListener('click', () => { if (dx === 0) { dx = -1; dy = 0; } });
+  btnRight?.addEventListener('click', () => { if (dx === 0) { dx = 1; dy = 0; } });
 
   openBtn?.addEventListener('click', openGame);
   closeBtn?.addEventListener('click', closeGame);
