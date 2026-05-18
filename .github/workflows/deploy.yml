@@ -1,5 +1,5 @@
 # =========================================================================
-# ----------- WORKFLOW: DESPLIEGUE SEGURO DE LANDING EN GITHUB PAGES ------
+# ----------- WORKFLOW: DESPLIEGUE SEGURO NATIVO GITHUB PAGES -------------
 # =========================================================================
 name: Deploy to GitHub Pages
 
@@ -16,19 +16,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout your repository using git
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # CRÍTICO: Configurar Node 22 explicitamente antes de que corra Astro
       - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
-      - name: Install, build, and upload your site
-        uses: withastro/action@v3
+      - name: Install dependencies
+        run: npm ci
+
+      # Forzamos a Astro a compilar estático ignorando el modo server de Render
+      - name: Build static site with Astro
+        run: npx astro build --output static
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          node-version: 22 # Forzar el runtime compatible con Astro v6+
+          path: ./dist
 
   deploy:
     needs: build
