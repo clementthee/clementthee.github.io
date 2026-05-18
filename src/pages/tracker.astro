@@ -7,22 +7,23 @@ import HabitCard from '../components/HabitCard.astro';
 import { getMonthWeeksMatrix, MONTHS_LIST } from '../utils/dateHelpers';
 import pg from 'pg';
 
-export const prerender = false;
+export const prerender = false; // Fuerza el procesamiento dinámico en servidor
 
+// Capturar parámetros de tiempo desde la URL o usar fecha actual por defecto
 const url = new URL(Astro.request.url);
 const currentMonth = parseInt(url.searchParams.get('month') || new Date().getMonth().toString());
 const currentYear = parseInt(url.searchParams.get('year') || new Date().getFullYear().toString());
 
-const daysArray = getDaysInMonth(currentMonth, currentYear);
-
-// Jalar la URL de conexión de forma dinámica (Local o Nube)
+// Jalar la URL de conexión de forma dinámica (Localhost Docker o Neon Cloud)
 const connectionString = process.env.DATABASE_URL;
 
 const pool = new pg.Pool({
   connectionString,
+  // Manejo de SSL inteligente adaptado a entornos Serverless en la nube
   ssl: connectionString?.includes('neon.tech') ? { rejectUnauthorized: false } : false
 });
 
+// Variables semilla para evitar interrupciones de renderizado
 let extendedHabits = [];
 let totalHabits = 0;
 let totalChecks = 0;
@@ -30,7 +31,7 @@ let totalTargets = 0;
 let globalPercentage = 0;
 
 try {
-  // Asegurar migración relacional balanceada
+  // Asegurar la integridad de las tablas relacionales en caliente
   await pool.query(`
     CREATE TABLE IF NOT EXISTS habits (
       id TEXT PRIMARY KEY,
@@ -46,14 +47,17 @@ try {
     );
   `);
 
+  // Extraer hábitos indexados de este periodo
   const habitsRes = await pool.query('SELECT * FROM habits WHERE month_index = $1 AND year_index = $2', [currentMonth, currentYear]);
   const dbHabits = habitsRes.rows;
 
+  // Cruzar información relacional para empaquetar días ejecutados
   extendedHabits = await Promise.all(dbHabits.map(async (habit) => {
     const comps = await pool.query('SELECT day_number FROM completions WHERE habit_id = $1', [habit.id]);
     return { ...habit, completedDays: comps.rows.map(r => r.day_number) };
   }));
 
+  // Operaciones de analítica global del Dashboard (Métricas Sheets)
   totalHabits = extendedHabits.length;
   totalChecks = extendedHabits.reduce((acc, h) => acc + h.completedDays.length, 0);
   totalTargets = extendedHabits.reduce((acc, h) => acc + h.target, 0);
@@ -64,6 +68,7 @@ try {
   console.error("================================================");
 }
 
+// Configuración matemática de vectores para el Anillo SVG Dinámico
 const radius = 40;
 const circumference = 2 * Math.PI * radius;
 const strokeDashoffset = circumference - (globalPercentage / 100) * circumference;
