@@ -4,7 +4,7 @@
 // =========================================================================
 import MainLayout from '../layouts/MainLayout.astro';
 import HabitCard from '../components/HabitCard.astro';
-import { getDaysInMonth, MONTHS_LIST } from '../utils/dateHelpers';
+import { getMonthWeeksMatrix, MONTHS_LIST } from '../utils/dateHelpers';
 import pg from 'pg';
 
 export const prerender = false;
