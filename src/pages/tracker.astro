@@ -1,6 +1,6 @@
 ---
 // =========================================================================
-// 1. BACKEND CONEXIÓN POSTGRES E INDICADORES (SERVER SIDE)
+// 1. CONSULTAS ADAPTATIVAS DEL SERVIDOR CON CONTROL ENTORNO (SSR)
 // =========================================================================
 import MainLayout from '../layouts/MainLayout.astro';
 import HabitCard from '../components/HabitCard.astro';
@@ -13,8 +13,14 @@ const url = new URL(Astro.request.url);
 const currentMonth = parseInt(url.searchParams.get('month') || new Date().getMonth().toString());
 const currentYear = parseInt(url.searchParams.get('year') || new Date().getFullYear().toString());
 
+const daysArray = getDaysInMonth(currentMonth, currentYear);
+
+// Jalar la URL de conexión de forma dinámica (Local o Nube)
+const connectionString = process.env.DATABASE_URL;
+
 const pool = new pg.Pool({
-  connectionString: "postgresql://postgres:Angie2706+@localhost:5433/tracker_db"
+  connectionString,
+  ssl: connectionString?.includes('neon.tech') ? { rejectUnauthorized: false } : false
 });
 
 let extendedHabits = [];
@@ -24,6 +30,22 @@ let totalTargets = 0;
 let globalPercentage = 0;
 
 try {
+  // Asegurar migración relacional balanceada
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS habits (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      target INTEGER DEFAULT 15,
+      month_index INTEGER,
+      year_index INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS completions (
+      habit_id TEXT REFERENCES habits(id) ON DELETE CASCADE,
+      day_number INTEGER,
+      PRIMARY KEY (habit_id, day_number)
+    );
+  `);
+
   const habitsRes = await pool.query('SELECT * FROM habits WHERE month_index = $1 AND year_index = $2', [currentMonth, currentYear]);
   const dbHabits = habitsRes.rows;
 
@@ -36,11 +58,12 @@ try {
   totalChecks = extendedHabits.reduce((acc, h) => acc + h.completedDays.length, 0);
   totalTargets = extendedHabits.reduce((acc, h) => acc + h.target, 0);
   globalPercentage = totalTargets > 0 ? Math.min(Math.round((totalChecks / totalTargets) * 100), 100) : 0;
-} catch (e) {
-  console.error(e);
+} catch (error) {
+  console.error("====== PROGRESS LAB DATABASE ENGINE ERROR ======");
+  console.error(error);
+  console.error("================================================");
 }
 
-// Configuración del Anillo de Progreso SVG Matemático
 const radius = 40;
 const circumference = 2 * Math.PI * radius;
 const strokeDashoffset = circumference - (globalPercentage / 100) * circumference;
