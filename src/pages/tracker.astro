@@ -1,0 +1,219 @@
+---
+// =========================================================================
+// 1. BACKEND CONEXIÓN POSTGRES E INDICADORES (SERVER SIDE)
+// =========================================================================
+import MainLayout from '../layouts/MainLayout.astro';
+import HabitCard from '../components/HabitCard.astro';
+import { getDaysInMonth, MONTHS_LIST } from '../utils/dateHelpers';
+import pg from 'pg';
+
+export const prerender = false;
+
+const url = new URL(Astro.request.url);
+const currentMonth = parseInt(url.searchParams.get('month') || new Date().getMonth().toString());
+const currentYear = parseInt(url.searchParams.get('year') || new Date().getFullYear().toString());
+
+const pool = new pg.Pool({
+  connectionString: "postgresql://postgres:Angie2706+@localhost:5433/tracker_db"
+});
+
+let extendedHabits = [];
+let totalHabits = 0;
+let totalChecks = 0;
+let totalTargets = 0;
+let globalPercentage = 0;
+
+try {
+  const habitsRes = await pool.query('SELECT * FROM habits WHERE month_index = $1 AND year_index = $2', [currentMonth, currentYear]);
+  const dbHabits = habitsRes.rows;
+
+  extendedHabits = await Promise.all(dbHabits.map(async (habit) => {
+    const comps = await pool.query('SELECT day_number FROM completions WHERE habit_id = $1', [habit.id]);
+    return { ...habit, completedDays: comps.rows.map(r => r.day_number) };
+  }));
+
+  totalHabits = extendedHabits.length;
+  totalChecks = extendedHabits.reduce((acc, h) => acc + h.completedDays.length, 0);
+  totalTargets = extendedHabits.reduce((acc, h) => acc + h.target, 0);
+  globalPercentage = totalTargets > 0 ? Math.min(Math.round((totalChecks / totalTargets) * 100), 100) : 0;
+} catch (e) {
+  console.error(e);
+}
+
+// Configuración del Anillo de Progreso SVG Matemático
+const radius = 40;
+const circumference = 2 * Math.PI * radius;
+const strokeDashoffset = circumference - (globalPercentage / 100) * circumference;
+---
+
+<MainLayout title="Progress Lab | Analytics Dashboard">
+  <main class="min-h-screen bg-slate-950 text-slate-200 px-4 py-12 font-sans flex flex-col items-center justify-start">
+    <div class="max-w-4xl w-full flex flex-col gap-6" id="dashboard-context" data-month={currentMonth} data-year={currentYear}>
+      
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+        <div>
+          <h1 class="text-3xl font-extrabold tracking-tight text-white uppercase font-mono">Progress Lab</h1>
+          <form method="GET" class="mt-2 flex gap-2">
+            <select name="month" onchange="this.form.submit()" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-300 focus:outline-none">
+              {MONTHS_LIST.map((m, idx) => (
+                <option value={idx} selected={idx === currentMonth}>{m}</option>
+              ))}
+            </select>
+            <select name="year" onchange="this.form.submit()" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-300 focus:outline-none">
+              <option value="2026" selected={currentYear === 2026}>2026</option>
+              <option value="2027" selected={currentYear === 2027}>2027</option>
+            </select>
+          </form>
+        </div>
+        <a href="/" class="text-xs font-mono text-slate-400 hover:text-white transition-colors bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+          ← Volver al inicio
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-900/20 border border-slate-800 p-6 rounded-3xl backdrop-blur-sm font-mono">
+        
+        <div class="flex flex-col justify-center gap-3 md:col-span-1">
+          <div class="p-4 bg-slate-950/60 border border-slate-900/80 rounded-xl flex justify-between items-center">
+            <span class="text-xs text-slate-500 uppercase tracking-wider">Hábitos Activos</span>
+            <span class="text-xl font-bold text-white">{totalHabits}</span>
+          </div>
+          <div class="p-4 bg-slate-950/60 border border-slate-900/80 rounded-xl flex justify-between items-center">
+            <span class="text-xs text-slate-500 uppercase tracking-wider">Checks Totales</span>
+            <span class="text-xl font-bold text-blue-400">{totalChecks}</span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950/60 border border-slate-900/80 rounded-xl flex flex-col justify-between gap-3 md:col-span-1">
+          <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Eficiencia de volumen</span>
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs text-slate-400">
+              <span>Progreso Global</span>
+              <span>{totalChecks}/{totalTargets} días</span>
+            </div>
+            <div class="w-full h-3 bg-slate-900 border border-slate-800 rounded-md overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500" style={`width: ${globalPercentage}%`}></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950/60 border border-slate-900/80 rounded-xl flex items-center justify-around md:col-span-1">
+          <div class="relative flex items-center justify-center">
+            <svg class="w-24 h-24 transform -rotate-90">
+              <circle cx="48" cy="48" r={radius} stroke="#1e293b" stroke-width="8" fill="transparent" />
+              <circle cx="48" cy="48" r={radius} stroke="url(#gradient)" stroke-width="8" fill="transparent" 
+                      stroke-dasharray={circumference} stroke-dashoffset={strokeDashoffset} stroke-linecap="round" class="transition-all duration-500" />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#3b82f6" />
+                  <stop offset="100%" stop-color="#10b981" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="absolute text-lg font-bold text-white">{globalPercentage}%</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Éxito General</span>
+            <span class="text-xs text-slate-400 mt-1 block font-sans">Meta Mensual</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/30 border border-slate-800/80 p-6 rounded-2xl backdrop-blur-sm">
+        <h3 class="text-sm font-mono font-bold text-white uppercase mb-4"> + Gestionar mis Hábitos</h3>
+        <form id="add-habit-form" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div class="flex flex-col gap-2 md:col-span-2">
+            <label class="text-xs font-mono text-slate-400">Nombre del hábito:</label>
+            <input type="text" id="habit-name-input" placeholder="Ej. 🏋️‍♂️ Workout" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none" required />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-mono text-slate-400">Meta (Días):</label>
+            <input type="number" id="habit-target-input" min="1" max="31" value="15" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none" required />
+          </div>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-mono font-bold text-xs uppercase py-3 rounded-xl cursor-pointer">
+            Añadir Hábito
+          </button>
+        </form>
+      </div>
+
+      <div class="flex flex-col gap-4" id="tracker-container">
+        {extendedHabits.map(habit => (
+          <HabitCard id={habit.id} name={habit.name} targetDays={habit.target} monthIndex={currentMonth} yearIndex={currentYear} completedDays={habit.completedDays} />
+        ))}
+      </div>
+
+    </div>
+  </main>
+</MainLayout>
+
+<script>
+  // =========================================================================
+  // 6. SCRIPTS ASÍNCRONOS DEL CLIENTE (DESPACHADORES FETCH)
+  // =========================================================================
+  const container = document.getElementById('tracker-container');
+  const form = document.getElementById('add-habit-form') as HTMLFormElement;
+  const contextEl = document.getElementById('dashboard-context');
+
+  const monthIndex = parseInt(contextEl?.getAttribute('data-month') || '0');
+  const yearIndex = parseInt(contextEl?.getAttribute('data-year') || '2026');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById('habit-name-input') as HTMLInputElement;
+    const targetInput = document.getElementById('habit-target-input') as HTMLInputElement;
+
+    const res = await fetch('/api/habits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'CREATE_HABIT',
+        id: 'h_' + Date.now(),
+        name: nameInput.value.trim(),
+        target: parseInt(targetInput.value) || 15,
+        monthIndex,
+        yearIndex
+      })
+    });
+
+    if (res.ok) window.location.reload();
+  });
+
+  container?.addEventListener('click', async (e) => {
+    const targetEl = e.target as HTMLElement;
+    
+    const btn = targetEl.closest('.day-btn');
+    if (btn) {
+      const card = btn.closest('.habit-card');
+      const habitId = card?.getAttribute('data-habit-id');
+      const dayNum = parseInt(btn.getAttribute('data-day') || '0');
+
+      btn.classList.toggle('bg-gradient-to-br');
+      btn.classList.toggle('from-blue-600');
+      btn.classList.toggle('to-indigo-600');
+      btn.classList.toggle('border-blue-500');
+      btn.classList.toggle('text-white');
+
+      const res = await fetch('/api/habits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'TOGGLE_DAY', id: habitId, dayNum })
+      });
+
+      if (res.ok) window.location.reload();
+      return;
+    }
+
+    const deleteBtn = targetEl.closest('.delete-habit-btn');
+    if (deleteBtn && confirm('¿Deseas eliminar este hábito por completo?')) {
+      const card = deleteBtn.closest('.habit-card');
+      const habitId = card?.getAttribute('data-habit-id');
+
+      const res = await fetch('/api/habits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE_HABIT', id: habitId })
+      });
+
+      if (res.ok) window.location.reload();
+    }
+  });
+</script>

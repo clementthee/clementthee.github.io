@@ -1,0 +1,86 @@
+---
+// =========================================================================
+// ----------------- 1. PROPS Y CÁLCULOS DEL BACKEND (SSR) -----------------
+// =========================================================================
+import { getMonthWeeksMatrix } from '../utils/dateHelpers';
+
+interface Props {
+  id: string;
+  name: string;
+  targetDays: number;
+  monthIndex: number;
+  yearIndex: number;
+  completedDays: number[];
+}
+
+const { id, name, targetDays, monthIndex, yearIndex, completedDays } = Astro.props;
+
+// Obtener la matriz de semanas (Mapeo de 7 columnas)
+const weeksMatrix = getMonthWeeksMatrix(monthIndex, yearIndex);
+
+const totalCompleted = completedDays.length;
+const progressPercentage = targetDays > 0 ? Math.min(Math.round((totalCompleted / targetDays) * 100), 100) : 0;
+---
+
+<div class="habit-card p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-sm relative" data-habit-id={id} data-target={targetDays}>
+  
+  <button class="delete-habit-btn absolute top-4 right-4 text-slate-600 hover:text-rose-400 font-mono text-xs cursor-pointer transition-colors">
+    ✕ Eliminar
+  </button>
+
+<!-- TEXTOS Y CONTADORES  -->
+
+
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+    <div>
+      <h4 class="text-white font-mono font-bold text-base tracking-wide uppercase">{name}</h4>
+      <p class="text-xs font-mono text-slate-500 mt-1">Meta mensual: {targetDays} días</p>
+    </div>
+    
+    <div class="flex items-center gap-3 font-mono text-xs">
+      <div class="bg-slate-950 px-3 py-1.5 border border-slate-800 rounded-lg text-slate-400">
+        Racha: <span class="text-blue-400 font-bold habit-count">{totalCompleted}</span> días
+      </div>
+      <div class="bg-slate-950 px-3 py-1.5 border border-slate-800 rounded-lg text-slate-400">
+        Progreso: <span class="text-emerald-400 font-bold habit-percentage">{progressPercentage}%</span>
+      </div>
+    </div>
+  </div>
+<!-- 3. BARRA DE PROGRESO INDIVIDUAL -->
+  <div class="w-full h-2 bg-slate-950 border border-slate-900 rounded-full mb-6 overflow-hidden">
+    <div class="progress-bar-fill h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-500" style={`width: ${progressPercentage}%`}></div>
+  </div>
+<!-- 4. TABLA DE CALENDARIO (MATRIZ SEMANAL) -->
+  <div class="w-full bg-slate-950/40 border border-slate-900 rounded-xl p-4 flex justify-center">
+    <div class="grid grid-cols-7 gap-2 max-w-sm w-full font-mono text-center">
+      
+      {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(dayLabel => (
+        <span class="text-[10px] font-bold text-slate-600 uppercase py-1">{dayLabel}</span>
+      ))}
+
+      {weeksMatrix.map((week) => (
+        week.map((day) => {
+          if (day.isPlaceholder) {
+            // Renderizar celda vacía para días fuera del mes
+            return <div class="w-9 h-9 bg-transparent"></div>;
+          }
+
+          const isChecked = completedDays.includes(day.dayNum);
+          return (
+            <button
+              class={`day-btn w-9 h-9 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center select-none ${
+                isChecked 
+                  ? 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-500 text-white shadow-md shadow-indigo-500/10 scale-95' 
+                  : 'border-slate-800 bg-slate-950/70 text-slate-400 hover:border-slate-700 hover:bg-slate-900'
+              }`}
+              data-day={day.dayNum}
+            >
+              {day.dayNum}
+            </button>
+          );
+        })
+      ))}
+    </div>
+  </div>
+</div>

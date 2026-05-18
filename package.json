@@ -10,8 +10,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^10.1.1",
     "@tailwindcss/vite": "^4.2.2",
     "astro": "latest",
+    "pg": "^8.21.0",
     "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0"
   }
 }

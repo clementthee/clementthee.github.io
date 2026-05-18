@@ -1,0 +1,21 @@
+# =========================================================================
+# ----------- ARCHIVOS IGNORADOS POR SEGURIDAD Y RENDIMIENTO -------------
+# =========================================================================
+
+# Dependencias instaladas (se regeneran con npm install)
+node_modules/
+
+# Carpetas de compilación y caché de Astro
+dist/
+.astro/
+
+# Variables de entorno y contraseñas secretas (¡Muy importante!)
+.env
+.env.production
+.env.local
+
+# Archivos de configuración de editores o sistemas operativos
+.DS_Store
+.vscode/
+.idea/
+npm-debug.log*
