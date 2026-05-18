@@ -1,6 +1,8 @@
 ---
-
-import MainLayout from '../../layouts/MainLayout.astro';
+// =========================================================================
+// 1. FRONTMATTER INTERNATIONALIZATION DESIGN (ENGLISH)
+// =========================================================================
+import MainLayout from '../../layouts/MainLayout.astro'; // Ajuste de subnivel de carpeta
 import { ui } from '../../utils/ui';
 
 const lang = 'en';
@@ -14,8 +16,6 @@ const t = ui[lang];
       
       <div class="absolute -top-12 -left-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-
-
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 w-full">
         <div class="flex items-center gap-4 justify-between sm:justify-start w-full sm:w-auto">
           <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-mono text-emerald-400">
@@ -23,8 +23,8 @@ const t = ui[lang];
             Open to Opportunities
           </div>
           
-          <a href="/en" class="text-xs font-mono text-slate-400 hover:text-white transition-colors bg-slate-800/40 border border-slate-800 px-2.5 py-1 rounded-md">
-            🇺🇸 English
+          <a href="/" class="text-xs font-mono text-slate-400 hover:text-white transition-colors bg-slate-800/40 border border-slate-800 px-2.5 py-1 rounded-md">
+            🇪🇸 Español
           </a>
         </div>
         
@@ -32,7 +32,6 @@ const t = ui[lang];
           {t['game.btn']}
         </button>
       </div>
-
 
       <div class="text-center sm:text-left">
         <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-white">
@@ -48,7 +47,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <div class="space-y-6">
         <h3 class="text-white font-bold text-xl tracking-wide uppercase font-mono text-center sm:text-left">
           {t['stack.title']}
@@ -83,7 +81,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <section class="w-full font-mono">
         <div class="flex items-center gap-3 pb-4 mb-6">
           <h2 class="text-lg font-bold text-white uppercase tracking-wider">{t['projects.title']}</h2>
@@ -110,16 +107,14 @@ const t = ui[lang];
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Astro</span>
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">TypeScript</span>
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Tailwind</span>
-                <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Local Storage</span>
+                <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">PostgreSQL</span>
               </div>
               <a 
-  href="https://clementthee-github-io.onrender.com/tracker" 
-  class="inline-flex items-center justify-center w-full text-center bg-slate-950 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-xs font-bold text-slate-400 hover:text-white py-2.5 px-4 rounded-xl transition-all shadow-md"
-  target="_blank" 
-  rel="noopener noreferrer"
->
-  {t['projects.tracker.btn']}
-</a>
+                href="/tracker" 
+                class="inline-flex items-center justify-center w-full text-center bg-slate-950 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-xs font-bold text-slate-400 hover:text-white py-2.5 px-4 rounded-xl transition-all shadow-md"
+              >
+                {t['projects.tracker.btn']}
+              </a>
             </div>
           </div>
 
@@ -135,7 +130,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full relative z-10">
         <a href="https://linkedin.com/in/tu-usuario" target="_blank" rel="noopener noreferrer" 
            class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3">
@@ -152,13 +146,12 @@ const t = ui[lang];
         <a href="mailto:clementthee@gmail.com" 
            class="w-full sm:w-auto px-8 py-3 bg-slate-900 border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white font-medium rounded-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3">
           <img src="/icons/gmail.svg" alt="Gmail" class="w-5 h-5 invert" />
-          <span>Contacto</span>
+          <span>Contact</span>
         </a>
       </div>
 
     </div>
 
-   
     <div id="game-modal" 
          data-alert={t['game.alert']} 
          class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">

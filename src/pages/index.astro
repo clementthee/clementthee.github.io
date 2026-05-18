@@ -1,4 +1,7 @@
 ---
+// =========================================================================
+// 1. FRONTMATTER CONFIGURACIÓN DE IDIOMA NATAL (ESPAÑOL)
+// =========================================================================
 import MainLayout from '../layouts/MainLayout.astro';
 import { ui } from '../utils/ui';
 
@@ -12,8 +15,6 @@ const t = ui[lang];
     <div class="max-w-3xl w-full bg-slate-900/50 border border-slate-800 p-8 md:p-12 rounded-3xl backdrop-blur-md shadow-2xl relative z-10">
       
       <div class="absolute -top-12 -left-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-
 
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 w-full">
         <div class="flex items-center gap-4 justify-between sm:justify-start w-full sm:w-auto">
@@ -32,7 +33,6 @@ const t = ui[lang];
         </button>
       </div>
 
-
       <div class="text-center sm:text-left">
         <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-white">
           Héctor <span class="bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500 bg-clip-text text-transparent">Martínez</span>
@@ -47,7 +47,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <div class="space-y-6">
         <h3 class="text-white font-bold text-xl tracking-wide uppercase font-mono text-center sm:text-left">
           {t['stack.title']}
@@ -82,7 +81,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <section class="w-full font-mono">
         <div class="flex items-center gap-3 pb-4 mb-6">
           <h2 class="text-lg font-bold text-white uppercase tracking-wider">{t['projects.title']}</h2>
@@ -109,16 +107,14 @@ const t = ui[lang];
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Astro</span>
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">TypeScript</span>
                 <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Tailwind</span>
-                <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">Local Storage</span>
+                <span class="bg-slate-950 border border-slate-800/60 px-2.5 py-1 rounded-md">PostgreSQL</span>
               </div>
               <a 
-  href="https://clementthee-github-io.onrender.com/tracker" 
-  class="inline-flex items-center justify-center w-full text-center bg-slate-950 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-xs font-bold text-slate-400 hover:text-white py-2.5 px-4 rounded-xl transition-all shadow-md"
-  target="_blank" 
-  rel="noopener noreferrer"
->
-  {t['projects.tracker.btn']}
-</a>
+                href="/tracker" 
+                class="inline-flex items-center justify-center w-full text-center bg-slate-950 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-xs font-bold text-slate-400 hover:text-white py-2.5 px-4 rounded-xl transition-all shadow-md"
+              >
+                {t['projects.tracker.btn']}
+              </a>
             </div>
           </div>
 
@@ -134,7 +130,6 @@ const t = ui[lang];
 
       <div class="w-full h-[1px] bg-slate-800/60 my-8"></div>
 
-      
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full relative z-10">
         <a href="https://linkedin.com/in/tu-usuario" target="_blank" rel="noopener noreferrer" 
            class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3">
@@ -157,7 +152,6 @@ const t = ui[lang];
 
     </div>
 
-   
     <div id="game-modal" 
          data-alert={t['game.alert']} 
          class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
